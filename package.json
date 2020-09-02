@@ -1,0 +1,31 @@
+{
+	"name": "dlit-bot",
+	"version": "1.0.0",
+	"description": "",
+	"main": "dist/index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"watch": "npx tsc --watch"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/TheGLander/dlit-bot.git"
+	},
+	"author": "G lander",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/TheGLander/dlit-bot/issues"
+	},
+	"homepage": "https://github.com/TheGLander/dlit-bot#readme",
+	"devDependencies": {
+		"@types/node": "^14.6.2",
+		"@typescript-eslint/eslint-plugin": "^4.0.1",
+		"@typescript-eslint/parser": "^4.0.1",
+		"eslint": "^7.8.1",
+		"eslint-config-prettier": "^6.11.0",
+		"eslint-plugin-prettier": "^3.1.4",
+		"prettier": "^2.1.1",
+		"telegraf": "^3.38.0",
+		"typescript": "^4.0.2"
+	}
+}

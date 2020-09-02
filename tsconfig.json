@@ -1,0 +1,13 @@
+{
+	"compilerOptions": {
+		"moduleResolution": "Node",
+		"esModuleInterop": true,
+		"outDir": "dist",
+		"module": "commonjs",
+		"target": "ES5",
+		"incremental": true,
+		"resolveJsonModule": true,
+		"sourceMap": true
+	},
+	"include": ["src/**/*.ts"]
+}

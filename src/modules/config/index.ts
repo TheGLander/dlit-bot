@@ -1,15 +1,16 @@
 import Telegraf from "telegraf"
 import { TelegrafContext } from "telegraf/typings/context"
+
 export default function ({ bot }: { bot: Telegraf<TelegrafContext> }): void {
 	bot.command("trust", async ctx => {
-		if (
+		/*if (
 			!["administrator", "creator"].includes(
-				(await ctx.getChatMember(ctx?.from.id)).status
+				(await (message?.from.id)).status
 			)
 		) {
-			ctx.reply("Надо быть админом для /trust!")
+			message.reply("Надо быть админом для /trust!")
 			return
-		}
+		}*/
 		const trustedUser = ctx.message.entities.filter(
 			val => val.type === "text_mention"
 		)[0]?.user

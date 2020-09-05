@@ -1,4 +1,4 @@
-import { Telegraf } from "telegraf"
+import Telegraf from "telegraf"
 import config from "./config.json"
 import fs from "fs"
 import path from "path"
@@ -21,5 +21,5 @@ import path from "path"
 	/*
 	 */
 
-	bot.launch()
+	bot.startPolling()
 })()

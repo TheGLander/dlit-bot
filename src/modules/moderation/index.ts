@@ -1,23 +1,33 @@
 import Telegraf from "telegraf"
 import { TelegrafContext } from "telegraf/typings/context"
 const start = Date.now() / 1000
-
-const spamMsgs: Map<number, number[]> = new Map()
+interface SpamMessage {
+	id: number
+	type: "image" | "text"
+	deleted: boolean
+}
+const spamMsgs: Map<number, SpamMessage[]> = new Map()
 const spammers: number[] = []
 export async function registerSpam(ctx: TelegrafContext): Promise<void> {
 	if ((ctx.message?.date ?? 0) < start) return
-	let messages: number[] = []
+	let messages: SpamMessage[] = []
 	if (spamMsgs.has(ctx.from.id)) messages = spamMsgs.get(ctx.from.id)
-	messages.push(ctx.message.message_id)
+	const newMsg: SpamMessage = {
+		id: ctx.message.message_id,
+		type: ctx.message.photo ? "image" : "text",
+		deleted: false,
+	}
+	if (newMsg.type === "image") return
+	messages.push(newMsg)
 	spamMsgs.set(ctx.from.id, messages)
-	console.log(messages)
+	//console.log(messages)
 	if (messages.length >= 5) {
-		for (const id of messages)
-			try {
-				await ctx.deleteMessage(id)
-			} catch {
-				console.log("Failed to delete message")
+		for (const msg of messages)
+			if (!msg.deleted) {
+				await ctx.deleteMessage(msg.id)
+				msg.deleted = true
 			}
+
 		let result: boolean
 		try {
 			result = await ctx.restrictChatMember(ctx.from.id, {
@@ -38,7 +48,7 @@ export async function registerSpam(ctx: TelegrafContext): Promise<void> {
 	}
 	setTimeout(() => {
 		const messages = spamMsgs.get(ctx.from.id)
-		messages.splice(messages.indexOf(ctx.message.message_id))
+		messages.splice(messages.indexOf(newMsg))
 		spamMsgs.set(ctx.from.id, messages)
 		if (spammers.includes(ctx.from.id) && messages.length < 5)
 			spammers.splice(spammers.indexOf(ctx.from.id), 1)
@@ -47,7 +57,7 @@ export async function registerSpam(ctx: TelegrafContext): Promise<void> {
 
 export default function ({ bot }: { bot: Telegraf<TelegrafContext> }): void {
 	//Anti spam
-	bot.command("spam", async ctx => {
+	/*bot.command("spam", async ctx => {
 		return ctx
 		let reply = "Сообщения: "
 		const ids = [...spamMsgs.keys()]
@@ -59,5 +69,5 @@ export default function ({ bot }: { bot: Telegraf<TelegrafContext> }): void {
 		}
 		ctx.reply(reply)
 	})
-	bot.use(registerSpam)
+	bot.use(registerSpam)*/
 }

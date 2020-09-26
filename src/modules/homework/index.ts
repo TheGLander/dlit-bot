@@ -3,7 +3,6 @@ import Enmap from "enmap"
 import Telegraf from "telegraf"
 import { TelegrafContext } from "telegraf/typings/context"
 import config from "../../config.json"
-import { ExtraEditMessage } from "telegraf/typings/telegram-types"
 
 export default async function ({
 	bot,
@@ -55,7 +54,7 @@ export default async function ({
 			)
 			return
 		}
-		homeworkMap.set(fullName, args[1])
+		homeworkMap.set(fullName, args.slice(1).join(","))
 		ctx.reply(`Всё, записал ДЗ для предмета ${fullName}!`)
 		updatePins(ctx)
 	})

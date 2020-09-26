@@ -87,9 +87,9 @@ export default async function ({
 		}
 		ctx.reply(retText)
 	})
-	/*bot.command("sethwpin", async ctx => {
+	bot.command("sethwpin", async ctx => {
 		const msg = await ctx.reply("ы")
 		homeworkMap.set("pins", JSON.stringify([msg.chat.id, msg.message_id]))
 		updatePins(ctx)
-	})*/
+	})
 }

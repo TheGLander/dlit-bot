@@ -16,24 +16,29 @@ export function expandLessonName(lessonName: string): string | null {
 	return fullName ?? null
 }
 
+export interface HomeworkEntry {
+	value: string
+	editTime: number
+}
+
 export default async function ({
 	bot,
 }: {
 	bot: Telegraf<TelegrafContext>
 }): Promise<void> {
-	const homeworkMap: Enmap<string, string> = await getEnmap("homework")
-	function updatePins(ctx: TelegrafContext) {
-		if (!homeworkMap.has("pins")) return
-		const params = JSON.parse(homeworkMap.get("pins"))
-		let newText = ""
-		for (const keyVal of homeworkMap.entries()) {
-			if (keyVal[0] === "pins") continue
-			newText += `${keyVal[0]}: ${keyVal[1]}\n`
-		}
+	const homeworkMap: Enmap<string, HomeworkEntry> = await getEnmap("homework")
 
-		ctx.telegram.editMessageText(params[0], params[1], undefined, newText)
+	if (true) {
+		const oldMap: Enmap<string, HomeworkEntry | string> = homeworkMap
+		for (const i of oldMap.map(
+			(val, key) =>
+				[
+					key,
+					typeof val === "string" ? { value: val, editTime: 0 } : val,
+				] as const
+		))
+			homeworkMap.set(i[0], i[1])
 	}
-
 	bot.command("sethw", async ctx => {
 		const args = ctx.message.text
 			.substr(6)
@@ -59,9 +64,11 @@ export default async function ({
 			)
 			return
 		}
-		homeworkMap.set(fullName, args.slice(1).join(","))
+		homeworkMap.set(fullName, {
+			value: args.slice(1).join(","),
+			editTime: Date.now(),
+		})
 		ctx.reply(`Всё, записал ДЗ для предмета ${fullName}!`)
-		updatePins(ctx)
 	})
 	bot.command("hw", async ctx => {
 		const args = ctx.message.text
@@ -72,23 +79,26 @@ export default async function ({
 		for (const arg of args) {
 			if (arg.length <= 0) continue
 			// Allign name
-			const fullName = expandLessonName(args[0])
+			const fullName = expandLessonName(arg)
 			if (fullName !== undefined) {
 				lessonsToFeature.push(fullName)
 			}
 		}
 		if (lessonsToFeature.length === 0) return
 		let retText = ""
-		for (const lesson of lessonsToFeature) {
-			retText += `${lesson}: ${
-				homeworkMap.has(lesson) ? homeworkMap.get(lesson) : "???"
-			}\n`
+		for (const lessonName of lessonsToFeature) {
+			if (!homeworkMap.has(lessonName)) continue
+			const lesson = homeworkMap.get(lessonName)
+			const editDate = new Date()
+			editDate.setTime(lesson.editTime)
+			retText += `${lessonName}: ${lesson.value} (${
+				lesson.editTime === 0 ? "???" : editDate.toLocaleString("en-GB")
+			})\n`
 		}
 		ctx.reply(retText)
 	})
-	bot.command("sethwpin", async ctx => {
+	/*bot.command("sethwpin", async ctx => {
 		const msg = await ctx.reply("ы")
 		homeworkMap.set("pins", JSON.stringify([msg.chat.id, msg.message_id]))
-		updatePins(ctx)
-	})
+	})*/
 }

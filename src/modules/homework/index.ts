@@ -4,6 +4,18 @@ import Telegraf from "telegraf"
 import { TelegrafContext } from "telegraf/typings/context"
 import config from "../../config.json"
 
+export function expandLessonName(lessonName: string): string | null {
+	let fullName = config.allowedLessons.find(name =>
+		typeof name === "string"
+			? name.toLowerCase().startsWith(lessonName.toLowerCase())
+			: name.some(name =>
+					name.toLowerCase().startsWith(lessonName.toLowerCase())
+			  )
+	)
+	if (typeof fullName === "object") fullName = fullName[0]
+	return fullName ?? null
+}
+
 export default async function ({
 	bot,
 }: {
@@ -34,15 +46,8 @@ export default async function ({
 			return
 		}
 		// Allign name
-		let fullName = config.allowedLessons.find(name =>
-			typeof name === "string"
-				? name.toLowerCase().startsWith(args[0].toLowerCase())
-				: name.some(name =>
-						name.toLowerCase().startsWith(args[0].toLowerCase())
-				  )
-		)
-		if (typeof fullName === "object") fullName = fullName[0]
-		if (fullName === undefined) {
+		const fullName = expandLessonName(args[0])
+		if (fullName === null) {
 			ctx.replyWithMarkdown(
 				`Неправильный предмет! Правильный предмет один из: ${config.allowedLessons
 					.map(val =>
@@ -67,12 +72,7 @@ export default async function ({
 		for (const arg of args) {
 			if (arg.length <= 0) continue
 			// Allign name
-			let fullName = config.allowedLessons.find(name =>
-				typeof name === "string"
-					? name.toLowerCase().startsWith(arg.toLowerCase())
-					: name.some(name => name.toLowerCase().startsWith(arg.toLowerCase()))
-			)
-			if (typeof fullName === "object") fullName = fullName[0]
+			const fullName = expandLessonName(args[0])
 			if (fullName !== undefined) {
 				lessonsToFeature.push(fullName)
 			}

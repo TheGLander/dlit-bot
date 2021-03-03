@@ -28,17 +28,6 @@ export default async function ({
 }): Promise<void> {
 	const homeworkMap: Enmap<string, HomeworkEntry> = await getEnmap("homework")
 
-	if (true) {
-		const oldMap: Enmap<string, HomeworkEntry | string> = homeworkMap
-		for (const i of oldMap.map(
-			(val, key) =>
-				[
-					key,
-					typeof val === "string" ? { value: val, editTime: 0 } : val,
-				] as const
-		))
-			homeworkMap.set(i[0], i[1])
-	}
 	bot.command("sethw", async ctx => {
 		const args = ctx.message.text
 			.substr(6)

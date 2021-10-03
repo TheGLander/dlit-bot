@@ -4,8 +4,11 @@ const enmaps: Map<string, Enmap> = new Map()
 export default async function getEnmap<T>(
 	name: string
 ): Promise<Enmap<string, T>> {
-	if (!enmaps.has(name)) enmaps.set(name, new Enmap({ name }))
-	const enmap = enmaps.get(name)
+	let enmap = enmaps.get(name)
+	if (!enmap) {
+		enmap = new Enmap({ name })
+		enmaps.set(name, enmap)
+	}
 	await enmap.defer
 	return enmap as Enmap<string, T>
 }

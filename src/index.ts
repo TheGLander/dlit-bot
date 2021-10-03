@@ -12,7 +12,7 @@ import zalgo from "zalgo-js"
 	bot.command("bl", ctx =>
 		ctx.reply(
 			zalgo("Ы".repeat(Math.ceil(Math.random() * 15 + 10)), {
-				intensity: new Date().getHours() / 120 + 0.5,
+				intensity: new Date().getMinutes() / 120 + 0.4 + Math.random() / 10,
 			})
 		)
 	)

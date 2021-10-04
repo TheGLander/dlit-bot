@@ -1,5 +1,6 @@
-import Telegraf from "telegraf"
+import Telegraf, { Telegram } from "telegraf"
 import { TelegrafContext } from "telegraf/typings/context"
+import { BotCommand as TBotCommand } from "telegraf/typings/telegram-types"
 
 const commands: BotCommand[] = []
 
@@ -10,6 +11,7 @@ export function implementAll(bot: Telegraf<TelegrafContext>): void {
 export class BotCommand {
 	constructor(
 		public command: string,
+		public description: string | null,
 		public middleware: (ctx: TelegrafContext) => void
 	) {
 		commands.push(this)
@@ -20,4 +22,13 @@ export class BotCommand {
 			this.middleware(ctx)
 		})
 	}
+}
+
+export function generateCommandDocs(): TBotCommand[] {
+	return commands
+		.filter<BotCommand & { description: string }>(
+			(val): val is BotCommand & { description: string } =>
+				val.description !== null
+		)
+		.map(val => ({ command: val.command, description: val.description }))
 }

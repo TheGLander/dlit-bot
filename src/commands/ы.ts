@@ -1,7 +1,7 @@
 import zalgo from "zalgo-js"
 import { BotCommand } from "../commandBase"
 
-new BotCommand("bl", ctx =>
+new BotCommand("bl", "ы", ctx =>
 	ctx.reply(
 		zalgo("Ы".repeat(Math.ceil(Math.random() * 15 + 10)), {
 			intensity: new Date().getMinutes() / 120 + 0.4 + Math.random() / 10,
@@ -19,7 +19,7 @@ function multText(txt: string, n: number): string {
 				acc.concat(
 					Array(n)
 						.fill(null)
-						.map(_ => val)
+						.map(() => val)
 				),
 			[] as string[]
 		)
@@ -34,7 +34,7 @@ const THE_BIG_ы = `
 ЫЫЫ Ы
 `.trim()
 
-new BotCommand("big_bl", ctx =>
+new BotCommand("big_bl", null, ctx =>
 	ctx.replyWithMarkdown(
 		"```\n" + multText(THE_BIG_ы, Math.floor(Math.random() * 4 + 1)) + "```"
 	)

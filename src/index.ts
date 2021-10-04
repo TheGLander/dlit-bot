@@ -1,21 +1,15 @@
 import Telegraf from "telegraf"
 import "dotenv-defaults/config"
-import zalgo from "zalgo-js"
+import "./commands"
 
-//
+import { implementAll } from "./commandBase"
 ;(async () => {
 	if (!process.env.TOKEN) throw new Error("No token supplied!")
 	const bot = new Telegraf(process.env.TOKEN)
-	bot.help(ctx => {
-		ctx.reply("DLIT v2 test.", { reply_to_message_id: ctx.message?.message_id })
-	})
-	bot.command("bl", ctx =>
-		ctx.reply(
-			zalgo("Ы".repeat(Math.ceil(Math.random() * 15 + 10)), {
-				intensity: new Date().getMinutes() / 120 + 0.4 + Math.random() / 10,
-			})
-		)
-	)
+
+	implementAll(bot)
 	bot.startPolling()
-	bot.options.username = (await bot.telegram.getMe()).username
+	const me = await bot.telegram.getMe()
+	bot.options.username = me.username
+	console.log(`Starting bot ${me.username}...`)
 })()

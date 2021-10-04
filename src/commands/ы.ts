@@ -8,3 +8,34 @@ new BotCommand("bl", ctx =>
 		})
 	)
 )
+
+function multText(txt: string, n: number): string {
+	return txt
+		.split("")
+		.reduce((acc, val) => acc + val.repeat(val === "\n" ? 1 : n), "")
+		.split("\n")
+		.reduce(
+			(acc, val) =>
+				acc.concat(
+					Array(n)
+						.fill(null)
+						.map(_ => val)
+				),
+			[] as string[]
+		)
+		.join("\n")
+}
+
+const THE_BIG_ы = `
+Ы   Ы
+Ы   Ы
+ЫЫЫ Ы
+Ы Ы Ы
+ЫЫЫ Ы
+`.trim()
+
+new BotCommand("big_bl", ctx =>
+	ctx.replyWithMarkdown(
+		"```\n" + multText(THE_BIG_ы, Math.floor(Math.random() * 4 + 1)) + "```"
+	)
+)

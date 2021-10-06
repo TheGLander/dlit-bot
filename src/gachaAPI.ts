@@ -32,11 +32,12 @@ export interface GatchaItem {
 	rarity: GatchaRarity
 	iconID: string
 	desc: string
+	id: string
 }
 
 export interface GatchaSpec {
 	boxes: Record<string, GatchaBox>
-	items: Record<string, GatchaItem>
+	items: GatchaItem[]
 }
 
 export class GatchaAPI {
@@ -56,9 +57,9 @@ export class GatchaAPI {
 		}
 		this.itemsByRarity = {} as Record<GatchaRarity, GatchaItem[]>
 		for (let i = 0; i < GatchaRarity.ы; i++)
-			this.itemsByRarity[i as GatchaRarity] = Object.values(
-				gatchaInfo.items
-			).filter(val => val.rarity === i)
+			this.itemsByRarity[i as GatchaRarity] = gatchaInfo.items.filter(
+				val => val.rarity === i
+			)
 	}
 	createUser(id: number): GatchaUser {
 		if (this.DB.has(id.toString())) throw new Error("This should never happen")

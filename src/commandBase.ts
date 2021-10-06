@@ -11,19 +11,26 @@ type CommandContext = Bot["command"] extends (
 		: never
 	: never
 
-const commands: BotCommand[] = []
+const implementables: BotImplementable[] = []
 
 export function implementAll(bot: Bot): void {
-	for (const command of commands) command.implement(bot)
+	for (const command of implementables) command.implement(bot)
 }
 
-export class BotCommand {
+export abstract class BotImplementable {
+	constructor() {
+		implementables.push(this)
+	}
+	abstract implement(bot: Bot): void
+}
+
+export class BotCommand extends BotImplementable {
 	constructor(
 		public command: string,
 		public description: string | null,
 		public middleware: MiddlewareFn<CommandContext>
 	) {
-		commands.push(this)
+		super()
 	}
 	implement(bot: Bot): void {
 		bot.command(this.command, ctx => {
@@ -34,10 +41,31 @@ export class BotCommand {
 }
 
 export function generateCommandDocs(): TBotCommand[] {
-	return commands
+	return implementables
 		.filter<BotCommand & { description: string }>(
 			(val): val is BotCommand & { description: string } =>
-				val.description !== null
+				val instanceof BotCommand && val.description !== null
 		)
 		.map(val => ({ command: val.command, description: val.description }))
+}
+
+type QueryContext = Bot["callbackQuery"] extends (
+	arg1: never,
+	arg2: infer A
+) => unknown
+	? A extends (arg1: infer B, ...args: never[]) => unknown
+		? B
+		: never
+	: never
+
+export class BotKeyboardResponse extends BotImplementable {
+	constructor(
+		public queryName: string,
+		public middleware: MiddlewareFn<QueryContext>
+	) {
+		super()
+	}
+	implement(bot: Bot): void {
+		bot.callbackQuery(this.queryName, this.middleware)
+	}
 }

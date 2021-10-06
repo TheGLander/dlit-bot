@@ -19,6 +19,7 @@
 	"homepage": "https://github.com/TheGLander/dlit-bot#readme",
 	"dependencies": {
 		"better-sqlite-pool": "^0.3.0",
+		"better-sqlite3": "^7.4.3",
 		"dotenv-defaults": "^3.0.0",
 		"enmap": "^5.7.1",
 		"telegraf": "^3.38.0",

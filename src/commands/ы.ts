@@ -35,7 +35,7 @@ const THE_BIG_ы = `
 `.trim()
 
 new BotCommand("big_bl", null, ctx =>
-	ctx.replyWithMarkdown(
+	ctx.reply(
 		"```\n" + multText(THE_BIG_ы, Math.floor(Math.random() * 4 + 1)) + "```"
 	)
 )

@@ -1,10 +1,19 @@
-import Telegraf, { Telegram } from "telegraf"
-import { TelegrafContext } from "telegraf/typings/context"
-import { BotCommand as TBotCommand } from "telegraf/typings/telegram-types"
+import { Bot, Context } from "grammy"
+import { BotCommand as TBotCommand } from "@grammyjs/types"
+import { MiddlewareFn, run } from "grammy/out/composer"
+
+type CommandContext = Bot["command"] extends (
+	arg1: never,
+	arg2: infer A
+) => unknown
+	? A extends (arg1: infer B, ...args: never[]) => unknown
+		? B
+		: never
+	: never
 
 const commands: BotCommand[] = []
 
-export function implementAll(bot: Telegraf<TelegrafContext>): void {
+export function implementAll(bot: Bot): void {
 	for (const command of commands) command.implement(bot)
 }
 
@@ -12,14 +21,14 @@ export class BotCommand {
 	constructor(
 		public command: string,
 		public description: string | null,
-		public middleware: (ctx: TelegrafContext) => void
+		public middleware: MiddlewareFn<CommandContext>
 	) {
 		commands.push(this)
 	}
-	implement(bot: Telegraf<TelegrafContext>): void {
+	implement(bot: Bot): void {
 		bot.command(this.command, ctx => {
 			if (!ctx.message || ctx.message.date - Date.now() / 1000 < -3) return
-			this.middleware(ctx)
+			run(this.middleware, ctx)
 		})
 	}
 }

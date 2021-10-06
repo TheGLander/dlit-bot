@@ -1,7 +1,18 @@
 import { BotCommand, BotKeyboardResponse } from "../commandBase"
-import { GatchaAPI } from "../gachaAPI"
+import { GatchaAPI, GatchaItem } from "../gachaAPI"
 import spec from "../gatchaSpec"
 import { InlineKeyboard } from "grammy"
+
+const rarityToText = [
+	"специальная",
+	"частая",
+	"нечастая",
+	"редкая",
+	"епичная",
+	"легендарная",
+	"мистическая",
+	"ы",
+]
 
 const api = new GatchaAPI(spec)
 
@@ -18,6 +29,18 @@ new BotCommand(
 	}
 )
 
+function generateWinText(items: GatchaItem[]): string {
+	const mappedResults = items.reduce<[GatchaItem, number][]>((acc, val) => {
+		const curItem = acc.find(sval => sval[0].id === val.id)
+		if (curItem) curItem[1]++
+		else acc.push([val, 1])
+		return acc
+	}, [])
+	return mappedResults
+		.map(val => `${val[0].name} (${rarityToText[val[0].rarity]}) x${val[1]}`)
+		.join("\n")
+}
+
 new BotCommand(
 	"gatcha_drydraw",
 	"Посмотри свои теоритические выйгрыши с лутбокса!",
@@ -25,7 +48,7 @@ new BotCommand(
 		await GatchaAPI.ready
 		const res = api.getItemsFromBox(spec.boxes.daily)
 		ctx.reply(`ГАЧЯ выйгрыши:
-${res.map(val => `${val.name} - Редкость ${val.rarity}\n`)}`)
+${generateWinText(res)}`)
 	}
 )
 
@@ -59,4 +82,16 @@ new BotCommand("gatcha_checksticker", "Посмотри на стикер!", ctx
 		reply_markup: select,
 		reply_to_message_id: ctx.msg.message_id,
 	})
+})
+
+new BotCommand("gatcha_boxdaily", "Открой ежедневный лутбокс!", ctx => {
+	if (!ctx.msg.from?.id) return
+	const items = api.openDailyBox(ctx.msg.from.id),
+		timeUntilBox = api.timeUntilDailyBox(ctx.msg.from.id)
+	if (!items || timeUntilBox > 0)
+		return ctx.reply(
+			`Подожди ещё ${Math.floor(timeUntilBox / 1000)}с до коробки!`
+		)
+	ctx.reply(`Ежедневые выйгрыши:
+${generateWinText(items)}`)
 })

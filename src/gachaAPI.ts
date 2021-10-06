@@ -17,6 +17,7 @@ export interface GatchaUser {
 	lastMessageT: number
 	validMessages: number
 	coins: number
+	lastDailyLootbox?: number
 }
 
 export interface GatchaBox {
@@ -107,5 +108,34 @@ export class GatchaAPI {
 			items.push(chosenItem)
 		}
 		return items
+	}
+	openBoxOnUser(userId: number, box: GatchaBox): GatchaItem[] {
+		const items = this.getItemsFromBox(box),
+			user = this.getUserById(userId)
+		for (const item of items)
+			if (user.quotesN[item.id] === undefined) user.quotesN[item.id] = 1
+			else user.quotesN[item.id]++
+		this.DB.set(userId.toString(), user)
+		return items
+	}
+	timeUntilDailyBox(userId: number): number {
+		const user = this.getUserById(userId)
+		return !user.lastDailyLootbox
+			? 0
+			: Math.max(
+					0,
+					Math.min(24 * 60 * 60 * 1000 + user.lastDailyLootbox - Date.now())
+			  )
+	}
+	openDailyBox(userId: number): GatchaItem[] | null {
+		const user = this.getUserById(userId)
+		if (
+			user.lastDailyLootbox &&
+			user.lastDailyLootbox - Date.now() < 24 * 60 * 60 * 1000
+		)
+			return null
+		user.lastDailyLootbox = Date.now()
+		this.DB.set(userId.toString(), user)
+		return this.openBoxOnUser(userId, this.gatchaInfo.boxes.daily)
 	}
 }

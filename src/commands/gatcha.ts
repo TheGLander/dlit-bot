@@ -86,8 +86,9 @@ new BotCommand("gatcha_checksticker", "Посмотри на стикер!", ctx
 
 new BotCommand("gatcha_boxdaily", "Открой ежедневный лутбокс!", ctx => {
 	if (!ctx.msg.from?.id) return
-	const items = api.openDailyBox(ctx.msg.from.id),
-		timeUntilBox = api.timeUntilDailyBox(ctx.msg.from.id)
+	const timeUntilBox = api.timeUntilDailyBox(ctx.msg.from.id),
+		items = api.openDailyBox(ctx.msg.from.id)
+
 	if (!items || timeUntilBox > 0)
 		return ctx.reply(
 			`Подожди ещё ${Math.floor(timeUntilBox / 1000)}с до коробки!`

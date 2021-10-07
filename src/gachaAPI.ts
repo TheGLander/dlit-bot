@@ -45,6 +45,7 @@ export class GatchaAPI {
 	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	static ready: Promise<Enmap<string, GatchaUser>> = new Promise(() => {})
 	private static DB?: Enmap<string, GatchaUser>
+	private validMessageInterval = 1000 * 60
 	get DB(): Enmap<string, GatchaUser> {
 		if (!GatchaAPI.DB)
 			throw new Error("Please use GatchaAPI.ready before using this!")
@@ -137,5 +138,14 @@ export class GatchaAPI {
 		user.lastDailyLootbox = Date.now()
 		this.DB.set(userId.toString(), user)
 		return this.openBoxOnUser(userId, this.gatchaInfo.boxes.daily)
+	}
+	onUserMessage(userId: number, sendTime: number): void {
+		const user = this.getUserById(userId)
+		if (sendTime - user.lastMessageT > this.validMessageInterval) {
+			user.coins++
+			user.validMessages++
+			user.lastMessageT = sendTime
+			this.DB.set(userId.toString(), user)
+		}
 	}
 }

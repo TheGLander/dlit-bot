@@ -69,3 +69,12 @@ export class BotKeyboardResponse extends BotImplementable {
 		bot.callbackQuery(this.queryName, this.middleware)
 	}
 }
+
+export class BotAnything extends BotImplementable {
+	constructor(public todo: (bot: Bot) => void) {
+		super()
+	}
+	implement(bot: Bot): void {
+		this.todo(bot)
+	}
+}

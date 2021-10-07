@@ -1,4 +1,4 @@
-import { BotCommand, BotKeyboardResponse } from "../commandBase"
+import { BotAnything, BotCommand, BotKeyboardResponse } from "../commandBase"
 import { GatchaAPI, GatchaItem } from "../gachaAPI"
 import spec from "../gatchaSpec"
 import { InlineKeyboard } from "grammy"
@@ -59,6 +59,7 @@ for (const item of spec.items) {
 		if (!ctx.msg || !ctx.msg.reply_to_message || !ctx.msg.reply_to_message.from)
 			return
 		const whoAsked = ctx.msg.reply_to_message.from.id
+		await GatchaAPI.ready
 		const res = api.getUserById(whoAsked)
 		const statMessage = await ctx.reply(
 			`Название: ${item.name}
@@ -84,8 +85,9 @@ new BotCommand("gatcha_checksticker", "Посмотри на стикер!", ctx
 	})
 })
 
-new BotCommand("gatcha_boxdaily", "Открой ежедневный лутбокс!", ctx => {
+new BotCommand("gatcha_boxdaily", "Открой ежедневный лутбокс!", async ctx => {
 	if (!ctx.msg.from?.id) return
+	await GatchaAPI.ready
 	const timeUntilBox = api.timeUntilDailyBox(ctx.msg.from.id),
 		items = api.openDailyBox(ctx.msg.from.id)
 
@@ -96,3 +98,10 @@ new BotCommand("gatcha_boxdaily", "Открой ежедневный лутбо�
 	ctx.reply(`Ежедневые выйгрыши:
 ${generateWinText(items)}`)
 })
+
+new BotAnything(bot =>
+	bot.on("message", async ctx => {
+		await GatchaAPI.ready
+		api.onUserMessage(ctx.message.from?.id ?? 0, ctx.message.date * 1000)
+	})
+)

@@ -1,6 +1,6 @@
-import { BotAnything, BotCommand, BotKeyboardResponse } from "../commandBase"
+/* import { BotAnything, BotCommand, BotKeyboardResponse } from "../commandBase"
 import { GatchaAPI, GatchaItem } from "../gachaAPI"
-import spec from "../gatchaSpec"
+// import spec from "../gatchaSpec"
 import { InlineKeyboard } from "grammy"
 
 const rarityToText = [
@@ -105,3 +105,4 @@ new BotAnything(bot =>
 		api.onUserMessage(ctx.message.from?.id ?? 0, ctx.message.date * 1000)
 	})
 )
+*/

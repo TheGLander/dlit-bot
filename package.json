@@ -4,7 +4,7 @@
 	"description": "",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"build": "npx tsc",
+		"build": "tsc",
 		"start": "node -r ts-node/register src/index.ts"
 	},
 	"repository": {
@@ -18,6 +18,8 @@
 	},
 	"homepage": "https://github.com/TheGLander/dlit-bot#readme",
 	"dependencies": {
+		"@types/debug": "^4.1.7",
+		"@types/node-fetch": "^3.0.3",
 		"better-sqlite-pool": "^0.3.0",
 		"better-sqlite3": "^7.4.3",
 		"dotenv-defaults": "^3.0.0",

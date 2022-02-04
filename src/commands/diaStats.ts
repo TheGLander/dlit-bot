@@ -22,6 +22,7 @@ new BotAnything(bot => {
 		if (balance === undefined) {
 			balance = 0
 		}
+
 		diaDB.set(repliedTo.toString(), balance + delta)
 	})
 })
@@ -32,17 +33,19 @@ new BotCommand("diatop", "Посмотри топ 10 Дія Рейтингов."
 
 	const map = [...diaDB.entries()]
 	map.sort((a, b) => -a[1] + b[1])
-	let str = "Топ 10:\n"
-	for (let i = 0; i < Math.min(map.length, 10); i++) {
+	let str = "Топ 100:\n"
+	for (let i = 0; i < Math.min(map.length, 100); i++) {
 		const [userName, bal] = map[i]
 		let user: string | undefined
 		try {
-			user = (await ev.getChatMember(parseInt(userName))).user.username
+			const userProfile = (await ev.getChatMember(parseInt(userName))).user
+			user = userProfile.first_name
 		} catch {
 			user = "???"
 		}
 		str += `${user}: ${bal}\n`
 	}
-	str = str.substring(0, str.length - 1)
+	if (Math.random() < 1 / 10) str = "Не скажу тебе"
+	else str = str.substring(0, str.length - 1)
 	ev.reply(str)
 })

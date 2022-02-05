@@ -13,6 +13,8 @@ const balanceChange: Record<string, number> = {
 new BotAnything(bot => {
 	bot.on("msg:sticker", async ev => {
 		if (!ev.message?.sticker) return
+		// Limit the message to 3 seconds ago
+		if (!ev.message || ev.message.date - Date.now() / 1000 < -3) return
 		const delta = balanceChange[ev.message.sticker.file_unique_id]
 		const repliedTo = ev.message.reply_to_message?.from?.id
 		if (!repliedTo || repliedTo === ev.message.from.id) return
@@ -27,12 +29,12 @@ new BotAnything(bot => {
 	})
 })
 
-new BotCommand("diatop", "Посмотри топ 10 Дія Рейтингов.", async ev => {
+new BotCommand("diatop", "Посмотри топ 100 Дія Рейтингов.", async ev => {
 	if (!ev.message) return
 	const diaDB = await diaDBPromise
 
 	const map = [...diaDB.entries()]
-	map.sort((a, b) => -a[1] + b[1])
+	map.sort((a, b) => b[1] - a[1])
 	let str = "Топ 100:\n"
 	for (let i = 0; i < Math.min(map.length, 100); i++) {
 		const [userName, bal] = map[i]

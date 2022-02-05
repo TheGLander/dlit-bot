@@ -1,80 +1,68 @@
-import { Bot, Context } from "grammy"
-import { BotCommand as TBotCommand } from "@grammyjs/types"
-import { MiddlewareFn, run } from "grammy/out/composer"
+import { BotAnything, BotCommand } from "../commandBase"
+import getEnmap from "../db"
 
-type CommandContext = Bot["command"] extends (
-	arg1: never,
-	arg2: infer A
-) => unknown
-	? A extends (arg1: infer B, ...args: never[]) => unknown
-		? B
-		: never
-	: never
+const diaDBPromise = getEnmap<number>("dia")
 
-const implementables: BotImplementable[] = []
-
-export function implementAll(bot: Bot): void {
-	for (const command of implementables) command.implement(bot)
+const balanceChange: Record<string, number> = {
+	AgADpwsAAo1TYEk: +10,
+	AgADVgsAAvl0aEk: +50,
+	AgAD6w8AApJ2YUk: -10,
+	AgAD8gsAAuATYUk: -50,
+	AgAD7xAAAq2ZCEo: 0,
 }
 
-export abstract class BotImplementable {
-	constructor() {
-		implementables.push(this)
-	}
-	abstract implement(bot: Bot): void
-}
+new BotAnything(bot => {
+	bot.on("msg:sticker", async ev => {
+		if (!ev.message?.sticker) return
+		// Limit the message to 3 seconds ago
+		if (!ev.message || ev.message.date - Date.now() / 1000 < -3) return
+		const delta = balanceChange[ev.message.sticker.file_unique_id]
+		const repliedTo = ev.message.reply_to_message?.from?.id
+		if (!repliedTo || repliedTo === ev.message.from.id) return
+		if (!delta && delta!=0) return
+		const diaDB = await diaDBPromise
+		let balance = diaDB.get(repliedTo.toString()) 
+		if (balance === undefined || delta === 0 || balance ==-9){
+			balance=0
+		}
+		diaDB.set(repliedTo.toString(), balance + delta)
+		
+	})
+})
 
-export class BotCommand extends BotImplementable {
-	constructor(
-		public command: string,
-		public description: string | null,
-		public middleware: MiddlewareFn<CommandContext>
-	) {
-		super()
-	}
-	implement(bot: Bot): void {
-		bot.command(this.command, ctx => {
-			if (!ctx.message || ctx.message.date - Date.now() / 1000 < -3) return
-			run(this.middleware, ctx)
-		})
-	}
-}
+new BotCommand("diatop", "Посмотри топ 100 Дія Рейтингов.", async ev => {
+	if (!ev.message) return
+	const diaDB = await diaDBPromise
 
-export function generateCommandDocs(): TBotCommand[] {
-	return implementables
-		.filter<BotCommand & { description: string }>(
-			(val): val is BotCommand & { description: string } =>
-				val instanceof BotCommand && val.description !== null
-		)
-		.map(val => ({ command: val.command, description: val.description }))
-}
+	const map = [...diaDB.entries()]
+	map.sort((a, b) => b[1] - a[1])
+	let str = "Топ 100:\n"
+	for (let i = 0; i < Math.min(map.length, 100); i++) {
+		const [userName, bal] = map[i]
+		let user: string | undefined
+		try {
+			const userProfile = (await ev.getChatMember(parseInt(userName))).user
+			user = userProfile.first_name
+		} catch {
+			user = "???"
+		}
+	if(bal==-9)
+		str += `${user}: magic\n`
+	else
+		str += `${user}: ${bal}\n`
+	}
+	if (Math.random() < 1 / 10) str = "Не скажу тебе"
+	else str = str.substring(0, str.length - 1)
+	ev.reply(str)
+})
+new BotCommand("diamagic", "Що? Магія...", async ev => {
+	if (!ev.message) return
+	const diaDB = await diaDBPromise
+	const repliedTo = ev.message.from.id
+	if (Math.random() < 1 / 10)  {
+		diaDB.set(repliedTo.toString(), -9)
+		ev.reply("Це магія!")
+	}else return
+})
 
-type QueryContext = Bot["callbackQuery"] extends (
-	arg1: never,
-	arg2: infer A
-) => unknown
-	? A extends (arg1: infer B, ...args: never[]) => unknown
-		? B
-		: never
-	: never
 
-export class BotKeyboardResponse extends BotImplementable {
-	constructor(
-		public queryName: string,
-		public middleware: MiddlewareFn<QueryContext>
-	) {
-		super()
-	}
-	implement(bot: Bot): void {
-		bot.callbackQuery(this.queryName, this.middleware)
-	}
-}
-
-export class BotAnything extends BotImplementable {
-	constructor(public todo: (bot: Bot) => void) {
-		super()
-	}
-	implement(bot: Bot): void {
-		this.todo(bot)
-	}
-}

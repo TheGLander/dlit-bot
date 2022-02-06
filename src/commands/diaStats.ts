@@ -21,12 +21,11 @@ new BotAnything(bot => {
 		if (!repliedTo || repliedTo === ev.message.from.id) return
 		if (delta === undefined) return
 		const diaDB = await diaDBPromise
-		let balance = diaDB.get(repliedTo.toString()) 
+		let balance = diaDB.get(repliedTo.toString())
 		if (balance === undefined || delta === 0 || balance === -9) {
 			balance = 0
 		}
 		diaDB.set(repliedTo.toString(), balance + delta)
-		
 	})
 })
 
@@ -35,7 +34,10 @@ new BotCommand("diatop", "Посмотри топ 100 Дія Рейтингов.
 	const diaDB = await diaDBPromise
 
 	const map = [...diaDB.entries()]
-	map.sort((a, b) => b[1] - a[1])
+	// A reminder: a > b => -1
+	map.sort((a, b) =>
+		a[1] === -9 ? (b[1] === -9 ? 0 : -1) : b[1] === -9 ? 1 : b[1] - a[1]
+	)
 	let str = "Топ 100:\n"
 	for (let i = 0; i < Math.min(map.length, 100); i++) {
 		const [userName, bal] = map[i]
@@ -54,7 +56,7 @@ new BotCommand("diatop", "Посмотри топ 100 Дія Рейтингов.
 })
 
 new BotCommand("diamagic", "Що? Магія...", async ev => {
-	if (!ev.message || !ev.message.from) return
+	if (!ev.message) return
 	if (Math.random() > 1 / 10) return
 	const diaDB = await diaDBPromise
 	diaDB.set(ev.message.from.id.toString(), -9)

@@ -22,8 +22,8 @@ new BotAnything(bot => {
 		if (delta === undefined) return
 		const diaDB = await diaDBPromise
 		let balance = diaDB.get(repliedTo.toString()) 
-		if (balance === undefined || delta === 0 || balance ==-9){
-			balance=0
+		if (balance === undefined || delta === 0 || balance === -9) {
+			balance = 0
 		}
 		diaDB.set(repliedTo.toString(), balance + delta)
 		

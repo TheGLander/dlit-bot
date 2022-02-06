@@ -19,7 +19,7 @@ new BotAnything(bot => {
 		const delta = balanceChange[ev.message.sticker.file_unique_id]
 		const repliedTo = ev.message.reply_to_message?.from?.id
 		if (!repliedTo || repliedTo === ev.message.from.id) return
-		if (!delta && delta!=0) return
+		if (delta === undefined) return
 		const diaDB = await diaDBPromise
 		let balance = diaDB.get(repliedTo.toString()) 
 		if (balance === undefined || delta === 0 || balance ==-9){
@@ -46,23 +46,18 @@ new BotCommand("diatop", "Посмотри топ 100 Дія Рейтингов.
 		} catch {
 			user = "???"
 		}
-	if(bal==-9)
-		str += `${user}: magic\n`
-	else
-		str += `${user}: ${bal}\n`
+		str += `${user}: ${bal === -9 ? "magic" : bal}\n`
 	}
 	if (Math.random() < 1 / 10) str = "Не скажу тебе"
 	else str = str.substring(0, str.length - 1)
 	ev.reply(str)
 })
+
 new BotCommand("diamagic", "Що? Магія...", async ev => {
-	if (!ev.message) return
-	const diaDB = await diaDBPromise
+	if (!ev.message || !ev.message.from) return
 	const repliedTo = ev.message.from.id
-	if (Math.random() < 1 / 10)  {
-		diaDB.set(repliedTo.toString(), -9)
-		ev.reply("Це магія!")
-	}else return
+	if (Math.random() > 1 / 10) return
+	const diaDB = await diaDBPromise
+	diaDB.set(repliedTo.toString(), -9)
+	ev.reply("Це магія!")
 })
-
-

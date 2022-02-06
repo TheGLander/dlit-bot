@@ -55,9 +55,8 @@ new BotCommand("diatop", "Посмотри топ 100 Дія Рейтингов.
 
 new BotCommand("diamagic", "Що? Магія...", async ev => {
 	if (!ev.message || !ev.message.from) return
-	const repliedTo = ev.message.from.id
 	if (Math.random() > 1 / 10) return
 	const diaDB = await diaDBPromise
-	diaDB.set(repliedTo.toString(), -9)
+	diaDB.set(ev.message.from.id.toString(), -9)
 	ev.reply("Це магія!")
 })

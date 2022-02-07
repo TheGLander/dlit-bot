@@ -2,6 +2,7 @@ import fetch from "node-fetch"
 import { BotAnything } from "../commandBase"
 
 const voteRegex = /data-votes="(\d+)"/
+const updateInterval = 1000 * 60 * 30
 
 new BotAnything(bot => {
 	async function postUpdate() {
@@ -18,9 +19,9 @@ new BotAnything(bot => {
 		)
 	}
 	const timeUntilStart =
-		Math.ceil(Date.now() / (1000 * 60 * 10)) * (1000 * 60 * 10) - Date.now()
+		Math.ceil(Date.now() / updateInterval) * updateInterval - Date.now()
 	setTimeout(() => {
 		postUpdate()
-		setInterval(postUpdate, 1000 * 60 * 10)
+		setInterval(postUpdate, updateInterval)
 	}, timeUntilStart)
 })
